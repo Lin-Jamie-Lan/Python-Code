@@ -1,0 +1,14 @@
+#import libraries
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import statsmodels.api as sm
+from pandas import ExcelWriter
+from pandas import ExcelFile
+from datetime import timedelta
+
+#Read files
+orders=pd.read_excel('C:/Users/gurdd/Desktop/python/global_superstore_2016.xlsx',sheet_name='Orders')
+orders2=pd.read_excel('C:/Users/gurdd/Desktop/python/global_superstore_2016.xlsx',sheet_name='Orders2')
+returns=pd.read_excel('C:/Users/gurdd/Desktop/python/global_superstore_2016.xlsx',sheet_name='Returns')
+People=pd.read_excel('C:/Users/gurdd/Desktop/python/global_superstore_2016.xlsx',sheet_name='People')
