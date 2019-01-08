@@ -12,3 +12,179 @@ orders=pd.read_excel('C:/Users/Desktop/python/global_superstore_2016.xlsx',sheet
 orders2=pd.read_excel('C:/Users/Desktop/python/global_superstore_2016.xlsx',sheet_name='Orders2')
 returns=pd.read_excel('C:/Users/Desktop/python/global_superstore_2016.xlsx',sheet_name='Returns')
 People=pd.read_excel('C:/Users//Desktop/python/global_superstore_2016.xlsx',sheet_name='People')
+
+#Remove Duplicates
+orders2=orders2.drop_duplicates()
+
+#Concatenate datasets
+combined_orders=pd.concat([orders,orders2])
+
+#joining orders with People and Return dataset
+combined_orders = combined_orders.merge(People,how='left')
+combined_orders = combined_orders.merge(returns,how='left')
+
+#Data Cleaning and preparation
+#SunString - Extracting the first two letters of column CustomerID
+combined_orders['St']=combined_orders['Customer ID'].str.slice(start=0,stop=2,step=None)
+
+#Split the Customer Name into First, Middle and Last name
+combined_orders[['FirstName', 'LastName', 'MiddleName']] = combined_orders['Customer Name'].str.split(' ', expand=True)
+
+#Extract the year from the Date column
+combined_orders['Year']=combined_orders['Order Date'].dt.year
+
+#Adding the days to OrderDate Column
+combined_orders["OrderDate_Plus_2"] = combined_orders["Order Date"] + timedelta(days=2)
+
+#Getting the difference in dates between two date columns
+combined_orders["DateDiff"]= combined_orders['Order Date']-combined_orders['Ship Date']
+
+#Concatenate two fields
+combined_orders["Cat_Sub_Cat"]=combined_orders['Category']+' - '+combined_orders['Sub-Category']
+
+#Define a function and create a flag
+def func(row):
+    if row['Profit'] <= 0 and row['Profit'] == 'Critical':
+        return 'A'
+    elif row['Profit'] <= 0 and row['Profit'] == 'High':
+        return 'B'
+    else:
+        return 'C'
+
+combined_orders['Flag'] = combined_orders.apply(func, axis=1)
+
+
+#Create a dataset after grouping by year
+combined_orders_grouped = combined_orders.groupby('Year')
+
+#Aggregating the sum and mean of profit
+combined_orders_groupedPF = combined_orders_grouped["Profit"].agg([np.sum,np.mean])
+combined_orders_groupedPF
+
+
+#Create a dataset after grouping by Product Name
+combined_orders_grouped2 = combined_orders.groupby('Product Name')
+
+#Aggregating the sum of profit
+combined_orders_grouped3 = combined_orders_grouped2["Profit"].agg([np.sum])
+combined_orders_grouped3
+
+#Order by sum in the decending order and select only the first 10 records
+top_products = combined_orders_grouped3.sort_values(by='sum', ascending=False).head(10)
+
+#Use the lerad and lag function to move the value of sum
+top_products['SumLag'] = top_products['sum'].shift(1)
+top_products['SumLead'] = top_products['sum'].shift(-1)
+
+#Calculate the percentage change in value of the one product with other
+top_products['Change']= ((top_products['sum']- top_products['SumLead'])/top_products['sum'])*100
+
+
+
+#VISUALIZATION
+#Pie-Chart
+colors = ['yellowgreen', 'gold', 'lightskyblue', 'lightcoral','red','green','blue','orange','white','brown']
+combined_orders['Segment'].value_counts().plot(kind='pie',title='Superstore by Segment',colors=colors)
+plt.show()
+
+#scatter plot 1
+combined_orders.plot(kind='scatter', x='Sales' ,y='Profit')
+plt.show()
+
+#scatter plot 2
+plt.scatter(combined_orders['Sales'],combined_orders['Profit'],color='red',label='ScatterPlot')
+plt.xlabel("Sales")
+plt.ylabel("Profit")
+plt.title("Profit vs Sales")
+plt.xlim(0,15000)
+plt.ylim(-4000,4000)
+plt.legend()
+plt.show()
+
+#line plot 1
+combined_orders.plot.line(x='Order Date', y='Sales', figsize=(12,3), lw=1)
+plt.show()
+
+#line plot 2
+plt.plot(combined_orders['Sales'],color='blue',label='line')
+plt.xlabel("Sales")
+plt.ylabel("Profit")
+plt.title("Profit vs Sales")
+plt.xlim(0,15000)
+plt.ylim(0,20000)
+plt.legend()
+plt.show()
+
+#line plot 3
+data=combined_orders.head(50)
+plt.plot(data['Sales'],data['Profit'],color='red',label='Line-graph')
+plt.scatter(data['Sales'],data['Profit'],color='blue',label='Scatter')
+plt.legend()
+plt.xlabel('Sales', color='green')
+plt.ylabel('Profit', color='brown')
+plt.show()
+
+#horizontal bar-graph
+data=combined_orders.head(10000)
+plt.barh(data['Sales'],data['Profit'],color=['blue','green','yellow'],label='Bar')
+plt.legend()
+plt.xlabel('Sales', color='green')
+plt.ylabel('Profit', color='brown')
+plt.show()
+
+#bar-graph
+data=combined_orders.head(10000)
+plt.bar(data['Sales'],data['Profit'],color='blue',label='Bar')
+plt.legend()
+plt.xlabel('Sales', color='green')
+plt.ylabel('Profit', color='brown')
+plt.show()
+
+#Figure and sub-plot
+data1=combined_orders.head(25)
+
+#figure
+fig=plt.figure()
+fig.patch.set_facecolor('gray')
+
+#(row, column, position)
+graph1=fig.add_subplot(2,2,1, facecolor='yellow')
+graph1.plot(data['Sales'],data['Profit'])
+graph1.set_title('Plot: Sales vs Profit')
+
+graph2=fig.add_subplot(2,2,2, facecolor='lightgreen')
+graph2.scatter(data['Sales'],data['Profit'])
+graph2.set_title('Scatter : Sales vs Profit')
+
+graph3=fig.add_subplot(2,1,2, facecolor='orange')
+graph3.scatter(data['Sales'],data['Profit'])
+graph3.set_title('Scatter : Sales vs Profit')
+
+plt.show()
+
+#Figure and sub-plot
+data1=combined_orders.head(25)
+
+#figure
+fig=plt.figure()
+fig.patch.set_facecolor('gray')
+
+#(row, column, position)
+graph1=fig.add_subplot(2,2,1, facecolor='yellow')
+graph1.plot(data['Sales'],data['Profit'])
+graph1.set_title('Plot: Sales vs Profit')
+
+graph2=fig.add_subplot(2,2,2, facecolor='lightgreen')
+graph2.scatter(data['Sales'],data['Profit'])
+graph2.set_title('Scatter : Sales vs Profit')
+
+graph3=fig.add_subplot(2,1,2, facecolor='orange')
+
+d1=len(data[data.Year == 2013])
+d2=len(data[data.Year == 2014])
+d3=len(data[data.Year == 2015])
+
+graph3.pie([d1,d2,d3],colors=["yellow","blue","green"],labels=['First','Second','Same Day'])
+graph3.legend(title='Description')
+
+plt.show()
