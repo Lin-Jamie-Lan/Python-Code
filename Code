@@ -80,6 +80,36 @@ top_products['SumLead'] = top_products['sum'].shift(-1)
 top_products['Change']= ((top_products['sum']- top_products['SumLead'])/top_products['sum'])*100
 
 
+#Filter, need to use ==
+FilterQuery2 = combined_orders[combined_orders.Number == '162107']
+FilterQuery2.head(3)
+
+#Filter if the column has a space, need to use ==, and you can select result to display
+FilterQuery3 = combined_orders[combined_orders['Ship Mode'] == 'First Class']
+FilterQuery3[['Row ID','Ship Mode']].head(3)
+
+#COUNT 
+#first groupby
+combined_orders_groupedbyname=combined_orders.groupby('Product Name')
+#lets try to do a count of Customer Name grouped by Product Name
+combined_orders_groupedbyname['Customer Name'].count()
+
+#How many entries are there for each “Product Name”?
+combined_orders['Product Name'].value_counts()
+
+#Number of non-null unique network entries
+combined_orders['Product Name'].nunique()
+
+
+#How many products in the each sub-category 
+orders_groupbySub=orders.groupby('Sub-Category')
+countall=orders_groupbySub['Product Name'].count()
+countall.head(5)
+
+#compare and see the difference
+countunique=orders_groupbySub['Product Name'].nunique()
+countunique.head(5)
+
 
 #VISUALIZATION
 #Pie-Chart
